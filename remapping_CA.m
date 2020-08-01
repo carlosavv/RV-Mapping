@@ -1,83 +1,76 @@
-function [clen, local_x, local_y,T] = remapping_CA(control_pts, rv)
-% Parameterize the RV point cloud using the Second Bezier Curve
-% The coordinates would include clen: curvature length
-% and polar coordinates phi : polar angle, rad : polar radius
-% or alternately, local_x and local_y in each plane
+function [clen, local_x, local_y] = remapping_CA( control_pts, rv ) 
+%% Remap the RV along its Bezier curve central axis.
 
-%% The control points are stored as p0 p1 p2 p3 p4 p5 p6 and p7
-p0 = control_pts(1,:); p1 = control_pts(2,:);
-p2 = control_pts(3,:); p3 = control_pts(4,:);
-p4 = control_pts(5,:); p5 = control_pts(6,:);
-p6 = control_pts(7,:); p7 = control_pts(8,:);
+% Algorithm description:
 
-% Point cloud
-x = rv(:,1); y = rv(:,2); z = rv(:,3);
+% We extend the Bezier curve as follows to create a curve B(T)
+% When T < 0, B(T) = B1(0) + T * unit tangent at B1(0)
+% When 0 <= T < 1, t = T, B(T) = B1(t)
+% When 1 <= T <= 2, t = T-1,  B(T)= B2(t)
+% When T > 2, B(T) = B2(1) + (T - 2) * unit tangent at B2(1)
 
-%  Using them we create the parameterization.
-planar_tol = 0.1;
+% (where B1, B2 have internal variable t in [ 0 1 ] )
 
-% Define the function for curve length
-syms f
-bp1 = @(f,k) 3*(1-f).^2*(p1(k)-p0(k)) + 6*(1-f).*f.*(p2(k)-p1(k)) + 2*f.^2*(p3(k)-p2(k));
-bp2 = @(f,k) 3*(1-f).^2*(p5(k)-p4(k)) + 6*(1-f).*f.*(p6(k)-p5(k)) + 2*f.^2*(p7(k)-p6(k));
-s1 = @(f) sqrt(bp1(f,1).^2+bp1(f,2).^2+bp1(f,3).^2);
-s2 = @(f) sqrt(bp2(f,1).^2+bp2(f,2).^2+bp2(f,3).^2);
+% let P be a point on the RV. We seek T such that |P-B(T)| is minimal,
+% and consequently P-B(T) is normal to dBdT
+% We solve this problem using fminsearch for now.
 
-% Defining the storage space
-clen = -1*ones(length(x),1);
-local_x = -1*ones(length(x),1);
-local_y = zeros(length(x),1);
-const_len = integral(@(f)s1(f),0,1);
-parfor j = 1:length(x) 
-    sample_pt = [x(j),y(j),z(j)];
-    for t = 0:0.001:1
-        % Position vector B
-        B1pt = (1-t)^3*p0 + 3*(1-t)^2*t*p1 + 3*(1-t)*t^2*p2 + t^3*p3;
-        % First derivative of B
-        dB1dt = 3*(1-t)^2*(p1-p0) + 6*(1-t)*t*(p2-p1) + 2*t^2*(p3-p2);
-        dB1dt_mag = norm(dB1dt);
-        % Tangent vector
-        Tan = dB1dt/dB1dt_mag;
-        flag = 0;
-        if abs(dot(Tan,(B1pt-sample_pt))) < planar_tol
-            flag = 1;
-            clen(j) = integral(@(f)s1(f),0,t)
-%             disp(clen(j))
-            % Projecting the origin vector 
-            Mat = [Tan(2),-Tan(1),0; Tan(3),0,-Tan(1);Tan(1),Tan(2),Tan(3)];
-            Rhs = [0;0;dot(Tan,B1pt)];
-            proj = Mat^-1*Rhs;
-            Nor = proj' - B1pt;
-            Nor = Nor/sqrt(dot(Nor,Nor));
-            Bin = cross(Tan,Nor);
-            Bin = Bin/sqrt(dot(Bin,Bin));
-            
-            [local_x(j),local_y(j)] = proj_on_plane(Tan,Nor,Bin,B1pt,[x(j),y(j),z(j)]);
-            T(j) = t
-        break;
-        end
-        % Position vector B
-        B2pt = (1-t)^3*p4 + 3*(1-t)^2*t*p5 + 3*(1-t)*t^2*p6 + t^3*p7;
-        % First derivative of B
-        dB2dt = 3*(1-t)^2*(p5-p4) + 6*(1-t)*t*(p6-p5) + 2*t^2*(p7-p6);
-        dB2dt_mag = sqrt(dot(dB2dt,dB2dt));
-        % Tangent vector
-        Tan = dB2dt/dB2dt_mag;
-        if (flag == 0 && abs(dot(Tan,(B2pt-sample_pt))) < planar_tol) 
-            clen(j) = integral(@(f)s2(f),0,t) + const_len;
-            % Projecting the origin vector 
-            Mat = [Tan(2),-Tan(1),0; Tan(3),0,-Tan(1);Tan(1),Tan(2),Tan(3)];
-            Rhs = [0;0;dot(Tan,B2pt)];
-            proj = Mat^-1*Rhs;
-            Nor = proj' - B2pt;
-            Nor = Nor/sqrt(dot(Nor,Nor));
-            Bin = cross(Tan,Nor);
-            Bin = Bin/sqrt(dot(Bin,Bin));
-            [local_x(j),local_y(j)] = proj_on_plane(Tan,Nor,Bin,B2pt,[x(j),y(j),z(j)]);
-            T(j) = t
-        break;
-        end
-    end
+% Get the total number of RV points
+num_points = length( rv(:,1) );
+
+% Create holding vectors for clen, local_x and local_y: assign value NaN to
+% weed out any bad values at the end
+clen = nan(num_points, 1 );
+local_x = nan(num_points, 1 );
+local_y = nan(num_points, 1 );
+
+% Define epsilon for checking whether B(T)-P is normal to dBdT
+epsilon = 1e-3;
+
+% loop over the RV points in parallel
+parfor jj = 1 : num_points
+    % Get current RV point P
+    P = rv( jj, : );
+    % Define optimization function as magnitude of B(T)-P
+    opt_fun = @(T) norm( calculate_B( T, control_pts ) - P );
+    % Calculate T value that minimizes |B(T)-P|, using "middle" of curve
+    % (T=1) as start point
+    % can improve this method for sure by playing with tolerances and
+    % multiple start points.
+    T_opt = fminsearch( @(T) opt_fun(T), 1 );
+    % Calculate B(T_opt)
+    B_Topt = calculate_B( T_opt, control_pts );
+    % Calculate the tangent at T_opt
+    dBdT_opt =calculate_dBdT( T_opt, control_pts );
+    % calculate the unit tangent
+    Tan = dBdT_opt / norm( dBdT_opt );
+    % let r = P - B(T_opt)
+    r = P - B_Topt;
+    % Check for normality, just in case.
+    if dot( Tan, r) < epsilon
+        % Because r is normal to the tangent, r is in the Frenet
+        % frame at B(T). Let Nor be the unit normal at B(T) and Bin be the 
+        % unit binormal at B(T). 
+        % We need a,b such that 
+        % r = a*Nor+b*Bin
+        % Hence, 
+        % r(1) = a*Nor(1) + b*Bin(1)
+        % r(2) = a*Nor(2) + b*Bin(2)
+        % solve as a linear system:
+        ab = [ Nor(1) Bin(1); Nor(2) Bin(2) ]\r';
+        % store a and b as local_x and local_y
+        local_x(jj) = ab(1);
+        local_y(jj) = ab(2);
+        % Calculate the length along the curve by integration:
+        clen( jj ) = calculate_clen( T_opt, control_pts );
+    end % otherwise, left as NaN, tidy up at end
+    
 end
+
+% Remove any NaNs - these points didn't work and will require debugging
+nan_idx = isnan( clen );
+clen(nan_idx) = [];
+local_x(nan_idx) = [];
+local_y(nan_idx) = [];
 
 end
