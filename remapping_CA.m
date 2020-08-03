@@ -51,6 +51,7 @@ parfor jj = 1 : num_points
         % Because r is normal to the tangent, r is in the Frenet
         % frame at B(T). Let Nor be the unit normal at B(T) and Bin be the 
         % unit binormal at B(T). 
+        [ Nor, Bin ] = calculate_NormalBinormal( Tan, point )
         % We need a,b such that 
         % r = a*Nor+b*Bin
         % Hence, 
