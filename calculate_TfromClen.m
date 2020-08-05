@@ -5,7 +5,7 @@ function T_current = calculate_TfromClen( clen, control_points )
 % To calculate T from clen, we need to find T such that int_0^T ds = clen
 
 % Calculate the length of the curved portion of B
-const_len_B = calculate_clen( 2 );
+const_len_B = calculate_clen( 2,control_points );
 
 if clen <= 0 % straight line along tangent at B(0)
     T_current = clen; % By definition, because B = T * dBdT(0)

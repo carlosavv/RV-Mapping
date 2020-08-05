@@ -30,8 +30,7 @@ parfor jj = 1 : num_points
     % calculate the unit normal and unit binormal at B(T)
     [ Nor, Bin ] = calculate_NormalBinormal( Tan, B_T )
     % calculate the reverse-remapped points, B(T) + local_x * Nor + local_y * Bin
-    xyz( jj, : ) = B_T + local_x( jj ) * Nor + local_y( jj ) * Bin
+    xyz( jj, : ) = B_T ;
 end
 
 end
-

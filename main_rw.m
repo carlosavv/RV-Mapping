@@ -70,7 +70,7 @@ x = rv(:,1); y = rv(:,2); z = rv(:,3);
 % This will act as the first approximation
 % Since it is a guess, it requires guess parameters g1 and g2
 
-g1 = ctd_rw(1)*0.9; g2 = ctd_pv(1)*.8;
+g1 = ctd_rw(1); g2 = ctd_pv(1);
 
 [p0, p1, p2, p3] = guess_CA(vrw, vpv, ctd_rw, ctd_pv, g1,g2);
 
@@ -103,7 +103,7 @@ plot_bezier(control_pts(5,:), control_pts(6,:),control_pts(7,:), control_pts(8,:
 
 %% Remapping the RV point cloud using Central Axis (CA)
 [clen, local_x, local_y] = remapping_CA(control_pts, rv);
-% save(strcat('clen_',rvname,'.csv'),"local_x","local_y","clen")
+% save(strcat(rvname,'_remmapped_points','.csv'),"local_x","local_y","clen")
 % Plot remapped RV
 figure(3);
 scatter3(local_x,local_y,clen,20,'filled'); hold on

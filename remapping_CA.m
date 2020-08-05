@@ -47,24 +47,24 @@ parfor jj = 1 : num_points
     % let r = P - B(T_opt)
     r = P - B_Topt;
     % Check for normality, just in case.
-    if dot( Tan, r) < epsilon
+%     if dot( Tan, r) < epsilon
         % Because r is normal to the tangent, r is in the Frenet
         % frame at B(T). Let Nor be the unit normal at B(T) and Bin be the 
         % unit binormal at B(T). 
-        [ Nor, Bin ] = calculate_NormalBinormal( Tan, point )
+        [ Nor, Bin ] = calculate_NormalBinormal( Tan, B_Topt );
         % We need a,b such that 
         % r = a*Nor+b*Bin
         % Hence, 
         % r(1) = a*Nor(1) + b*Bin(1)
         % r(2) = a*Nor(2) + b*Bin(2)
         % solve as a linear system:
-        ab = [ Nor(1) Bin(1); Nor(2) Bin(2) ]\r';
+        ab = [ Nor(1) Bin(1); Nor(2) Bin(2) ]\r(1:2)';
         % store a and b as local_x and local_y
         local_x(jj) = ab(1);
         local_y(jj) = ab(2);
         % Calculate the length along the curve by integration:
         clen( jj ) = calculate_clen( T_opt, control_pts );
-    end % otherwise, left as NaN, tidy up at end
+%     end % otherwise, left as NaN, tidy up at end
     
 end
 
