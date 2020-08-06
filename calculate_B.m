@@ -39,7 +39,7 @@ else % T > 2, use gradient at T = 2
     % Calculate point on curve by moving in straight line from B(2) along
     % tangent at T=2. Note T-2 is positive so will move in direction of the
     % tangent.
-    B = B_2 .* dBdT_2_unit * ( T - 2 );
+    B = B_2 + dBdT_2_unit * ( T - 2 );
 end
 
 end
