@@ -26,7 +26,7 @@ lvname = lvcell{1};
 [ long_axis, mvcentre,apex] = LV_longAxis(P1, P2, P3, lv);
 
 
-save (strcat('CentricAxis_',lvname,'.mat'), 'mvcentre', 'apex')
+%save (strcat('CentricAxis_',lvname,'.mat'), 'mvcentre', 'apex')
 
 %% Load RV data and transform to LV centric system 
 % z-axis = LV long axis
@@ -116,9 +116,22 @@ vtkRemappedRV = writeToVTK(strcat('remapped_',rvname),rvname,[local_x,local_y,cl
 
 %% Store to 3D Point Cloud 
 ptCloud = pointCloud([local_x,local_y,clen]);
-pcwrite(ptCloud,strcat('RemappedRV_new',rvname,'.ply'));
+remappedRVFileName = strcat('RemappedRV_new',rvname,'.ply');
+split_fileName = split(remappedRVFileName, '/');
+if length(split_fileName) > 1 % if folder present
+    if ~isfolder( split_fileName{1} )
+        mkdir( split_fileName{1} )
+    end
+end
+pcwrite(ptCloud,remappedRVFileName);
 
 %% 
-
-save(strcat('wkspc_',rvname,'.mat'))
+dataFileName = strcat('wkspc_',rvname,'.mat');
+split_fileName = split(dataFileName, '/');
+if length(split_fileName) > 1 % if folder present
+    if ~isfolder( split_fileName{1} )
+        mkdir( split_fileName{1} )
+    end
+end
+save( dataFileName )
 end

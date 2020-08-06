@@ -4,10 +4,17 @@ function vtkFile = writeToVTK(name, descriptor, ptcld)
 NN = size(ptcld,1);
 
 %remapped_rv = [local_x,local_y,clen];
+% Get folder if present:
+split_name = split( name, '/' );
+if length(split_name) > 1 % if folder present
+    if ~isfolder( split_name{1} )
+        mkdir( split_name{1} )
+    end
+end
 
 %vtkFile = fopen ('Normal2_0.vtk', 'w');
 vtkFile = fopen (strcat(name,'.vtk'), 'w');
-
+strcat(name,'.vtk')
 % Note: \n returns new line
 fprintf(vtkFile, '# vtk DataFile Version 3.0\n');
 %fprintf(vtkFile, 'Normal2 1445308987.976780\n');
