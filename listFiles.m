@@ -3,17 +3,17 @@ close all; clc;
 
 % locrv = ('D:\Workspace\Code (RV Shape)\RV_matlab_update_2_20\N2_RV_dat\');
 % loclv = 'D:\Workspace\Code (RV Shape)\RV_matlab_update_2_20\N2_LV_dat\';
-% locrv = ('C:\Workspace\Code (RV Shape)\RV_matlab_update_2_20\TOF01_0_1\TOF01_0_0_dat\');
-% loclv = ('C:\Workspace\Code (RV Shape)\RV_matlab_update_2_20\TOF01_0_0_LV\MS\TOF01_0_0_LV\');
-locrv = ('C:\Workspace\Code (RV Shape)_v1\RV_mapping_code\N2_RV_dat\');
-loclv = ('C:\Workspace\Code (RV Shape)_v1\RV_mapping_code\N2_LV_dat\');
+locrv = ('D:\Workspace\Code (RV Shape)_v1\RV_matlab_update_2_20\TOF01_0_1_dat\');
+loclv = ('D:\Workspace\Code (RV Shape)_v1\RV_matlab_update_2_20\TOF01_0_0_LV\TOF01_0_0_LV_dat\');
+% locrv = ('D:\Workspace\Code (RV shape)_v1\RV_matlab_update_2_20\N2_RV_dat\');
+% loclv = ('D:\Workspace\Code (RV shape)_v1\RV_matlab_update_2_20\N2_LV_dat\');
 % locrv = 'D:\Workspace\Code (RV Shape)_v1\RV_matlab_update_2_20\DMD01_stl\final\dat\';
 % loclv = 'D:\Workspace\Code (RV Shape)_v1\RV_matlab_update_2_20\DMD01_LV\';
 X = dir2(locrv);
 Y = dir2(loclv);
 
-lvconc = [Y(1).name ,Y(2).name,Y(3).name,Y(4).name,Y(5).name];
-rvconc = [X(1).name ,X(2).name,X(3).name,X(4).name,X(5).name];
+lvconc = [Y(1).name ,Y(2).name];%,Y(3).name,Y(4).name,Y(5).name];
+rvconc = [X(1).name ,X(2).name];%X(3).name,X(4).name,X(5).name];
 filerv = split(rvconc,'.dat');
 file0 = split(rvconc,'.dat');
 file1 = split(lvconc,'.dat');

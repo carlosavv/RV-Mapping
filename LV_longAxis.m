@@ -74,7 +74,7 @@ for i = 1:num_iter
     % Translate back and store the centroid
     projected_centroid(1,:) = cat(1,s.Centroid) + [xtrans-5,ytrans-5];
     % Obtain the centroid in 3D frame
-    mvcentre = projected_centroid(1,1)*vec1 + projected_centroid(1,2)*vec2 + node_pt
+    mvcentre = projected_centroid(1,1)*vec1 + projected_centroid(1,2)*vec2 + node_pt;
 end
 
 % apex = [67.49,-47.81,2022];
@@ -91,7 +91,7 @@ end
 
 %% Evaluating the long Axis Vector 
 long_axis = mvcentre - apex;
-long_axis = long_axis/sqrt(dot(long_axis,long_axis))
+long_axis = long_axis/sqrt(dot(long_axis,long_axis));
 
 % scatter3(lv(:,1),lv(:,2),lv(:,3),9,'filled');
 % hold on

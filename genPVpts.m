@@ -16,12 +16,12 @@ vpv = testpt - rv(idxz,:);
 vpv = vpv/sqrt(dot(vpv,vpv));
 ctd_pv = testpt;
 
-tol = 5;
+tol = 1;
 % pvx = zeros(length(rv),1);
 % pvy = zeros(length(rv),2);
 % pvz = zeros(length(rv),3);
 
-for loop = 1:2
+for loop = 1:5
     j = 1;
     clear pvx pvy pvz;
     for i=1:length(rv)

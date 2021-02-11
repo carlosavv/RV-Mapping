@@ -10,11 +10,11 @@ testpt = input('Enter a point (x,y,z) located at the free wall: ');
 vrw = testpt - ctd_pv;
 vrw = vrw/sqrt(dot(vrw,vrw));
 ctd_rw = testpt;
-tol = 5;
+tol = 0.18;
 
 
 
-for loop = 1:5
+for loop = 1:2
     j = 1;
     clear pvx pvy pvz;
     for i=1:length(rv)
