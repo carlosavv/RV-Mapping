@@ -20,10 +20,10 @@ function [n,V,p] = affine_fit(X)
     p = mean(X,1);
     
     % The samples are reduced:
-    R = bsxfun(@minus,X,p);
-    
+    R = bsxfun(@minus,X,p)
+    t = R'*R;
     % Computation of the principal directions of the sample cloud
-    [V,D] = eig(R'*R);
+    [V,D] = eig(t);
     
     % Extract the output from the eigenvectors
     n = V(:,1);
